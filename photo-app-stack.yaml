@@ -182,7 +182,7 @@ Resources:
         - !Ref SG
       UserData:
         Fn::Base64: |
-          #!/bin/bash
+          #!/bin/bash -xe
           apt-get update -qq
           apt-get install -y apt-transport-https ca-certificates
           apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
@@ -249,4 +249,4 @@ Outputs:
     Description: Public DNS of the RDS Instance
     Value: !GetAtt
       - DBInstance
-      - Name
+      - Endpoint.Address
