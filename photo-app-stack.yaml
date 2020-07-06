@@ -215,7 +215,7 @@ Resources:
   DatabaseInstance:
     Type: AWS::RDS::DBInstance
     Properties:
-      DBName: photo_app_db2
+      DBName: photo_app_db
       Engine: MySQL
       MasterUsername: root
       MasterUserPassword: password987
@@ -231,3 +231,22 @@ Resources:
       GroupDescription: Security Group for RDS public access
       DBSecurityGroupIngress:
         - CIDRIP: 0.0.0.0/0
+
+
+  # Outputs
+Outputs:
+  InstanceId:
+    Description: InstanceId of the EC2 instance
+    Value: !Ref EC2Instance
+
+  PublicIP:
+    Description: Public IP address of the EC2 instance
+    Value: !GetAtt
+      - EC2Instance
+      - PublicIp
+
+  RDSInstanceDNS:
+    Description: Public DNS of the RDS Instance
+    Value: !GetAtt
+      - DBInstance
+      - Name
