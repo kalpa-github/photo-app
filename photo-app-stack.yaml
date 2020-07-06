@@ -14,28 +14,25 @@ Parameters:
     Description: CIDR for Subnet
     Type: String
     Default: 10.0.1.0/24
-
+  # SSH KeyPair for EC2 instance
   KeyPairName:
     Description: EC2 KeyPair for SSH access to the instance
     Type: 'AWS::EC2::KeyPair::KeyName'
     ConstraintDescription: Existing EC2 KeyPair.
-
+  # EC2 Instance type
   InstanceType:
     Description: EC2 instance type
     Type: String
     Default: t2.micro
-
+  # EC2 ImageId - Ubuntu 16:04LTS
   InstanceImageId:
     Description: EC2 Image Id
     Type: AWS::EC2::Image::Id
-    Default: ami-088ff0e3bde7b3fdf # Amazon Linux 2 AMI
-
+    Default: ami-0e4bc04bd401729d6
+  # S3 Buckect name
   BucketName:
     Description: S3 Bucket for photo upload
     Type: String
-
-
-
 
 Resources:
   # VPC cerate
@@ -183,16 +180,23 @@ Resources:
       SubnetId: !Ref PublicSubnet
       SecurityGroupIds:
         - !Ref SG
+      UserData: !Base64 |
+        #!/bin/bash
+        apt-get update -qq
+        apt-get install -y apt-transport-https ca-certificates
+        apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+        echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" | tee /etc/apt/sources.list.d/docker.list
+        apt-get update -qq
+        apt-get purge lxc-docker || true
+        apt-get -y install linux-image-extra-$(uname -r) linux-image-extra-virtual
+        apt-get -y install docker-engine
+        usermod -aG docker ubuntu
+        mkdir -p /etc/systemd/system/docker.service.d
+        printf "[Service]\nExecStart=\nExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:80\n" >>  /etc/systemd/system/docker.service.d/docker.conf
+        systemctl daemon-reload
+        systemctl restart docker
       KeyName: !Ref KeyPairName
       ImageId: !Ref InstanceImageId
-      UserData:
-        Fn::Base64: |
-          #!/bin/bash -xe
-          yum update -y # good practice to update existing packages
-          yum install -y httpd # install web server
-          systemctl start httpd
-          systemctl enable httpd
-          echo "Hello World" > /var/www/html/index.html
       Tags:
        - Key: Name
          Value: app-ec2
@@ -206,7 +210,7 @@ Resources:
       BucketName: !Ref BucketName
       AccessControl: PublicRead
 
-  #  cewating RDS
+  #  Creating RDS
   DatabaseInstance:
     Type: AWS::RDS::DBInstance
     Properties:
@@ -217,7 +221,6 @@ Resources:
       DBInstanceClass: db.t2.micro
       AllocatedStorage: '5'
       DBInstanceIdentifier: photo-app-database
-      PubliclyAccessible: false
       DBSecurityGroups:
         - !Ref DatabaseSG
   # RDS SecurityGroup
