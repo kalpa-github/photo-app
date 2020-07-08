@@ -16,6 +16,8 @@ Infrastructure deployment can be done through either command line ( AWS cli ) or
 
 For command line deployment you need to have aws-cli installed on your deployment machine.
 
+https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-cli.html
+
 There are three cloudformation templates 
 
 1. Network-stack
@@ -31,10 +33,9 @@ ECS-service-stack : This include the services and resource allocation for ECS cl
 You can pass the values as parameter in each stack and important values ( url endpoints, network details, ASG and LB details ) can be find under “outputs” in aws cloudformation dashboard
 
 
-```sh
-$ aws cloudformation create-stack --stack-name photo-app-stack --template-body file:///home/user/photo-app.yaml --parameters  ParameterKey=NetworkCIDR,ParameterValue=10.0.0.0/16 ParameterKey=AvailabilityZoneName,ParameterValue=ap-south-1a ParameterKey=SubnetCIDR,ParameterValue=10.0.1.0/24 ParameterKey=KeyPairName,ParameterValue=MySshKey ParameterKey=InstanceType,ParameterValue=t2.micro ParameterKey=InstanceImageId,ParameterValue=ami-0e4bc04bd401729d6 ParameterKey=BucketName,ParameterValue=myphotos3bucket
-```
-If you are deploying the stack via AWS console please follow the below steps 
+#If you are deploying the stack via AWS console please follow the below steps 
+
+Please start with Network stack, then AWS-services-stack and finally ECS-service-stack since existing AWS resources required for complete operation
 
 - Login to AWS console  
 - Got to cloudformation and select create stack
