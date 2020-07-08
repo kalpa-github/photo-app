@@ -14,15 +14,21 @@ This repository contains a cloud formation infrastructure template for photo man
 
 Infrastructure deployment can be done through either command line ( AWS cli ) or web UI (AWS console)
 
-For command line deployment you need to have aws-cli installed on your deployment machine. In this template there are few parameters to update when you create a stack.
+For command line deployment you need to have aws-cli installed on your deployment machine.
 
-- Availability zone for Subnet
-- Network CIDR for VPC
-- Subnet CIDR for subnet
-- S3 Bucket name
-- Base AMI/ image id
-- EC2 instance type
-- KeyPair for EC2 ssh access
+There are three cloudformation templates 
+
+1. Network-stack
+2. AWS-services-stack
+3. ECS-service-stack
+
+Network stack: Setting up the network infrastructure including VPC, Subnets, routes and security groups
+
+AWS-services-stack : Setting up the AWS service which are required for  ECS cluster :  ALB, S# bucket and RDS
+
+ECS-service-stack : This include the services and resource allocation for ECS cluster
+
+You can you the values as parameter in each stack and important values ( url endpoints, network details, ASG and LB details ) can be find under “outputs” in aws cloudformation dashboard
 
 
 ```sh
