@@ -28,7 +28,7 @@ AWS-services-stack : Setting up the AWS service which are required for  ECS clus
 
 ECS-service-stack : This include the services and resource allocation for ECS cluster
 
-You can you the values as parameter in each stack and important values ( url endpoints, network details, ASG and LB details ) can be find under “outputs” in aws cloudformation dashboard
+You can pass the values as parameter in each stack and important values ( url endpoints, network details, ASG and LB details ) can be find under “outputs” in aws cloudformation dashboard
 
 
 ```sh
