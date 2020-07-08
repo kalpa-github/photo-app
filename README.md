@@ -33,7 +33,7 @@ There are three cloudformation templates
 You can pass the values as parameter in each stack and important values ( url endpoints, network details, ASG and LB details ) can be find under “outputs” in aws cloudformation dashboard
 
 
-# If you are deploying the stack via AWS console please follow the below steps 
+### If you are deploying the stack via AWS console please follow the below steps 
 
 Please start with Network stack, then AWS-services-stack and finally ECS-service-stack since existing AWS resources required for complete operation
 
