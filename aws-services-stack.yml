@@ -1,0 +1,113 @@
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: production
+    Description: Environment to add this load balancer
+ # S3 Buckect name
+  BucketName:
+    Description: S3 Bucket for photo upload
+    Type: String
+Resources:
+  EcsSecurityGroupIngressFromPublicALB:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Ingress from the public ALB
+      GroupId:
+        Fn::ImportValue: !Sub ${EnvironmentName}:ContainerSecurityGroup
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref 'PublicLoadBalancerSG'
+
+#Loadbalancer SecurityGroup
+  PublicLoadBalancerSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Access to the public facing load balancer
+      VpcId:
+        Fn::ImportValue: !Sub ${EnvironmentName}:VpcId
+      SecurityGroupIngress:
+          - CidrIp: 0.0.0.0/0
+            IpProtocol: -1
+  PublicLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internet-facing
+      LoadBalancerAttributes:
+      - Key: idle_timeout.timeout_seconds
+        Value: '30'
+      Subnets:
+        - Fn::ImportValue: !Sub ${EnvironmentName}:PublicSubnetOne
+        - Fn::ImportValue: !Sub ${EnvironmentName}:PublicSubnetTwo
+      SecurityGroups: [!Ref 'PublicLoadBalancerSG']
+#Test target group for iniciate ALB
+  TestTargetGroupPublic:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 6
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 2
+      VpcId:
+        Fn::ImportValue: !Sub ${EnvironmentName}:VpcId
+  PublicLoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    DependsOn:
+      - PublicLoadBalancer
+    Properties:
+      DefaultActions:
+        - TargetGroupArn: !Ref 'TestTargetGroupPublic'
+          Type: 'forward'
+      LoadBalancerArn: !Ref 'PublicLoadBalancer'
+      Port: 80
+      Protocol: HTTP
+
+    # Creating S3 bucket
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      AccessControl: PublicRead
+
+
+    #  Creating RDS
+  DatabaseInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBName: photo_app_db
+      Engine: MySQL
+      MasterUsername: root
+      MasterUserPassword: password987
+      DBInstanceClass: db.t2.micro
+      AllocatedStorage: '20'
+      DBInstanceIdentifier: photo-app-database
+      MultiAZ : true
+      DBSecurityGroups:
+        - !Ref DatabaseSG
+    # RDS SecurityGroup
+  DatabaseSG:
+    Type: AWS::RDS::DBSecurityGroup
+    Properties:
+      GroupDescription: Security Group for RDS public access
+      DBSecurityGroupIngress:
+        - CIDRIP: 0.0.0.0/0
+
+
+Outputs:
+  PublicListener:
+    Description: The ARN of the public load balancer's Listener
+    Value: !Ref PublicLoadBalancerListener
+    Export:
+      Name: !Sub ${EnvironmentName}:PublicListener
+  ExternalUrl:
+    Description: The url of the external load balancer
+    Value: !Sub http://${PublicLoadBalancer.DNSName}
+    Export:
+      Name: !Sub ${EnvironmentName}:ExternalUrl
+  RDSInstanceDNS:
+    Description: Public DNS of the RDS Instance
+    Value: !GetAtt
+      - DatabaseInstance
+      - Endpoint.Address
