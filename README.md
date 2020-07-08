@@ -24,16 +24,16 @@ There are three cloudformation templates
 2. AWS-services-stack
 3. ECS-service-stack
 
-Network stack: Setting up the network infrastructure including VPC, Subnets, routes and security groups
+- Network stack: Setting up the network infrastructure including VPC, Subnets, routes and security groups
 
-AWS-services-stack : Setting up the AWS service which are required for  ECS cluster :  ALB, S# bucket and RDS
+- AWS-services-stack : Setting up the AWS service which are required for  ECS cluster :  ALB, S# bucket and RDS
 
-ECS-service-stack : This include the services and resource allocation for ECS cluster
+- ECS-service-stack : This include the services and resource allocation for ECS cluster
 
 You can pass the values as parameter in each stack and important values ( url endpoints, network details, ASG and LB details ) can be find under “outputs” in aws cloudformation dashboard
 
 
-#If you are deploying the stack via AWS console please follow the below steps 
+# If you are deploying the stack via AWS console please follow the below steps 
 
 Please start with Network stack, then AWS-services-stack and finally ECS-service-stack since existing AWS resources required for complete operation
 
